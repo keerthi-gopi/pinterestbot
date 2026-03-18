@@ -1,0 +1,20 @@
+{
+  "name": "pinbot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "node bot.js",
+    "start": "node bot.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "cheerio": "^1.2.0",
+    "dotenv": "^17.3.1",
+    "telegraf": "^4.16.3"
+  }
+}
