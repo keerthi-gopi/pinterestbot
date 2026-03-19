@@ -3,5 +3,8 @@
     "api/webhook.js": {
       "maxDuration": 60
     }
-  }
+  },
+  "rewrites": [
+    { "source": "/", "destination": "/public/index.html" }
+  ]
 }
