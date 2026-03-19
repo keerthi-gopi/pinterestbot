@@ -1,12 +1,84 @@
 // api/privacy.js
-import { readFileSync } from "fs";
-import { join, dirname } from "path";
-import { fileURLToPath } from "url";
-
-const __dirname = dirname(fileURLToPath(import.meta.url));
-
 export default function handler(req, res) {
-  const html = readFileSync(join(__dirname, "../public/privacy.html"), "utf-8");
   res.setHeader("Content-Type", "text/html");
-  res.status(200).send(html);
+  res.status(200).send(`<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Privacy Policy — PinBot</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f0f0f; color: #fff; line-height: 1.7; }
+    nav { display: flex; justify-content: space-between; align-items: center; padding: 20px 40px; border-bottom: 1px solid #1e1e1e; }
+    .logo { font-size: 22px; font-weight: 700; color: #e60023; text-decoration: none; }
+    .logo span { color: #fff; }
+    .container { max-width: 760px; margin: 60px auto; padding: 0 24px 80px; }
+    h1 { font-size: 36px; font-weight: 800; margin-bottom: 8px; }
+    .updated { color: #555; font-size: 14px; margin-bottom: 48px; }
+    h2 { font-size: 20px; font-weight: 700; margin: 40px 0 12px; color: #e60023; }
+    p { color: #aaa; margin-bottom: 16px; font-size: 15px; }
+    ul { color: #aaa; padding-left: 20px; margin-bottom: 16px; font-size: 15px; }
+    ul li { margin-bottom: 8px; }
+    a { color: #e60023; }
+    .contact-box { background: #141414; border: 1px solid #222; border-radius: 12px; padding: 24px; margin-top: 40px; }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="/" class="logo">Pin<span>Bot</span></a>
+  </nav>
+  <div class="container">
+    <h1>Privacy Policy</h1>
+    <p class="updated">Last updated: March 2026</p>
+    <p>This Privacy Policy describes how PinBot collects, uses, and handles information when you use our Telegram bot and related services.</p>
+
+    <h2>1. Information We Collect</h2>
+    <ul>
+      <li>Telegram user ID and username</li>
+      <li>Amazon product URLs you send to the bot</li>
+      <li>Publicly available product data scraped from Amazon</li>
+    </ul>
+
+    <h2>2. How We Use Information</h2>
+    <ul>
+      <li>Scrape Amazon product data from URLs you provide</li>
+      <li>Generate Pinterest pin content using AI</li>
+      <li>Post generated pins to your Telegram channel</li>
+      <li>Post generated pins to your Pinterest board</li>
+    </ul>
+
+    <h2>3. Pinterest Data</h2>
+    <p>PinBot uses the Pinterest API to create and publish pins on your behalf. We request only minimum permissions: pins:write and boards:read. We do not store your Pinterest credentials beyond what is needed to operate the service.</p>
+
+    <h2>4. Data Storage</h2>
+    <p>We do not store any personal data, product URLs, or generated content in a database. All processing happens in real time and is discarded after the request is complete.</p>
+
+    <h2>5. Third Party Services</h2>
+    <ul>
+      <li>Telegram API — to receive and send messages</li>
+      <li>Scrapingdog — to scrape Amazon product data</li>
+      <li>Google Gemini API — to generate pin content</li>
+      <li>Pinterest API — to publish pins</li>
+    </ul>
+
+    <h2>6. Data Sharing</h2>
+    <p>We do not sell, trade, or share your personal data with any third parties except as required to operate the services listed above.</p>
+
+    <h2>7. Security</h2>
+    <p>All API keys and credentials are stored securely as environment variables and are never exposed publicly.</p>
+
+    <h2>8. Children's Privacy</h2>
+    <p>PinBot is not directed at children under 13. We do not knowingly collect data from children.</p>
+
+    <h2>9. Changes to This Policy</h2>
+    <p>We may update this Privacy Policy from time to time. Changes will be reflected on this page with an updated date.</p>
+
+    <div class="contact-box">
+      <h2 style="margin-top:0">10. Contact</h2>
+      <p>For any questions: <a href="https://github.com/keerthi-gopi">github.com/keerthi-gopi</a></p>
+    </div>
+  </div>
+</body>
+</html>`);
 }
