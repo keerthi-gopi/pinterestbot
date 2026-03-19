@@ -1,21 +1,44 @@
 // gemini.js
+import { getKeywords } from "./keywords.js";
+
 export async function generatePin(product) {
+  console.log("🤖 Generating pin for:", product.title);
+
+  // Get SEO keywords for this product category
+  const seoKeywords = getKeywords(product.title);
+  const keywordsText = seoKeywords.join(", ");
+
+  // Build features text
   const featuresText = product.features.length
-    ? product.features.slice(0, 3).map((f) => `• ${f}`).join("\n")
-    : "• Premium quality\n• Great value\n• Highly rated";
+    ? product.features.slice(0, 4).map((f) => `• ${f}`).join("\n")
+    : "• Check product page for full details";
 
-  // Keep prompt output SHORT to avoid MAX_TOKENS cutoff
-  const prompt = `You are a Pinterest SEO expert. Generate a Pinterest Pin as JSON.
+  const prompt = `You are a Pinterest SEO content expert for the Indian market.
 
-Product: ${product.title.slice(0, 100)}
+Create a Pinterest Pin for this Amazon product.
+
+Product: ${product.title}
+Brand: ${product.brand || "N/A"}
 Price: ${product.price}
-Features:
+Rating: ${product.rating || "N/A"} (${product.reviewCount || ""})
+Category: ${product.category || "General"}
+Key Features:
 ${featuresText}
 
-Return ONLY this JSON (keep description under 200 chars, tags max 10):
-{"title":"pin title under 80 chars","description":"under 200 chars with • bullet features and price","tags":["tag1","tag2","tag3","tag4","tag5","tag6","tag7","tag8","tag9","tag10"]}`;
+Pinterest SEO Keywords to include naturally:
+${keywordsText}
 
-  console.log("🤖 Calling Gemini...");
+Rules:
+- Title: max 80 chars, include top 1-2 SEO keywords, benefit-focused, catchy
+- Description: 150-200 chars, use • for 2-3 key features, mention price, end with call to action
+- Tags: 12 tags, mix of broad + niche + India-specific, NO # symbol, NO spaces in tags
+
+Return ONLY raw JSON. Start with { end with }. No markdown, no backticks:
+{
+  "title": "pin title here",
+  "description": "pin description here",
+  "tags": ["tag1","tag2","tag3","tag4","tag5","tag6","tag7","tag8","tag9","tag10","tag11","tag12"]
+}`;
 
   const res = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
@@ -26,70 +49,70 @@ Return ONLY this JSON (keep description under 200 chars, tags max 10):
         contents: [{ parts: [{ text: prompt }] }],
         generationConfig: {
           temperature: 0.7,
-          maxOutputTokens: 2048,
-          responseMimeType: "application/json", // force JSON output
+          maxOutputTokens: 1024,
+          responseMimeType: "application/json",
         },
       }),
     }
   );
 
   const data = await res.json();
+  console.log("📡 Gemini status:", res.status);
   console.log("📡 Finish reason:", data.candidates?.[0]?.finishReason);
 
+  // Check for API errors
   if (data.error) throw new Error(`Gemini error: ${data.error.message}`);
+  if (!data.candidates?.length) throw new Error("Gemini returned no response");
 
-  const raw = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
-  console.log("🤖 Raw response:\n", raw);
+  const raw = data.candidates[0]?.content?.parts?.[0]?.text || "";
+  console.log("🤖 Gemini raw:\n", raw);
 
-  // ── Parse with fallback ────────────────────────────────
+  // ── Parse JSON safely ─────────────────────────────────
   let parsed = {};
+
   try {
-    // Try direct parse first (responseMimeType forces clean JSON)
     parsed = JSON.parse(raw);
   } catch {
-    try {
-      // Try extracting JSON object
-      const match = raw.match(/\{[\s\S]*\}/);
-      if (match) parsed = JSON.parse(match[0]);
-    } catch {
-      // Build from partial — extract whatever fields came through
-      console.log("⚠️ Partial JSON, building from fragments...");
-
-      const titleMatch = raw.match(/"title"\s*:\s*"([^"]+)"/);
-      const descMatch = raw.match(/"description"\s*:\s*"([^"]+)"/);
-      const tagsMatch = raw.match(/"tags"\s*:\s*\[([^\]]*)\]/);
-
-      parsed = {
-        title: titleMatch?.[1] || product.title.slice(0, 80),
-        description: descMatch?.[1] || `${product.title.slice(0, 60)} — ${product.price}. Shop now!`,
-        tags: tagsMatch
-          ? tagsMatch[1].match(/"([^"]+)"/g)?.map((t) => t.replace(/"/g, "")) || []
-          : ["amazon", "deals", "shopping", "musthave"],
-      };
+    // Try extracting JSON object if there's extra text
+    const match = raw.match(/\{[\s\S]*\}/);
+    if (match) {
+      try {
+        parsed = JSON.parse(match[0]);
+      } catch {
+        console.log("⚠️ JSON parse failed, using fallbacks");
+      }
     }
   }
 
   // ── Fallbacks for missing fields ──────────────────────
-  if (!parsed.title) parsed.title = product.title.slice(0, 80);
-  if (!parsed.description) parsed.description = `${product.title.slice(0, 60)} at ${product.price}. Shop now!`;
-  if (!parsed.tags?.length) parsed.tags = ["amazon", "deals", "shopping", "musthave", "onlineshopping"];
+  if (!parsed.title) {
+    parsed.title = product.title.slice(0, 80);
+  }
+  if (!parsed.description) {
+    parsed.description =
+      `${product.title.slice(0, 60)} at ${product.price}. Shop now on Amazon India!`;
+  }
+  if (!parsed.tags?.length) {
+    parsed.tags = seoKeywords.map((k) => k.replace(/\s+/g, ""));
+  }
 
-  console.log("✅ Final pin:\n", JSON.stringify(parsed, null, 2));
+  console.log("✅ Final pin:", JSON.stringify(parsed, null, 2));
   return parsed;
 }
 
+// ── Format pin for Telegram channel post ─────────────────
 export function formatPin(pin, product) {
   const tags = pin.tags
     .map((t) => (t.startsWith("#") ? t : `#${t}`))
     .join(" ");
 
   return (
-    `📌 *Pinterest Pin*\n\n` +
-    `*Title:*\n${pin.title}\n\n` +
-    `*Description:*\n${pin.description}\n\n` +
-    `*Price:* ${product.price}\n` +
-    `*Rating:* ${product.reviewCount || product.rating || "N/A"}\n\n` +
-    `*Link:*\n${product.link}\n\n` +
-    `*Tags:*\n${tags}`
+    `📌 *${pin.title}*\n\n` +
+    `${pin.description}\n\n` +
+    `💰 *Price:* ${product.price}\n` +
+    `⭐ *Rating:* ${product.rating || "N/A"} ` +
+    `${product.reviewCount ? `(${product.reviewCount})` : ""}\n\n` +
+    `🛒 *Buy here:* ${product.link}\n\n` +
+    `${tags}`
   );
 }
