@@ -1,11 +1,11 @@
 {
   "functions": {
-    "api/webhook.js": {
-      "maxDuration": 60
-    }
+    "api/webhook.js": { "maxDuration": 60 },
+    "api/index.js": { "maxDuration": 10 },
+    "api/privacy.js": { "maxDuration": 10 }
   },
   "rewrites": [
-    { "source": "/privacy", "destination": "/public/privacy.html" },
-    { "source": "/", "destination": "/public/index.html" }
+    { "source": "/privacy", "destination": "/api/privacy" },
+    { "source": "/", "destination": "/api/index" }
   ]
 }
