@@ -56,7 +56,7 @@ export default function handler(req, res) {
 <body>
   <nav>
     <div class="logo">Pin<span>Bot</span></div>
-    <a href="https://t.me/Pinterest_Bot" class="nav-btn" target="_blank">Open in Telegram</a>
+    <a href="https://t.me/Pinterest_pins_bot" class="nav-btn" target="_blank">Open in Telegram</a>
   </nav>
 
   <div class="hero">
@@ -64,7 +64,7 @@ export default function handler(req, res) {
     <h1>Amazon links to<br/><em>Pinterest Pins</em><br/>automatically</h1>
     <p class="subtitle">Send Amazon product URLs to our Telegram bot and get SEO-optimized Pinterest pins posted to your channel instantly.</p>
     <div class="hero-btns">
-      <a href="https://t.me/Pinterest_Bot" class="btn-primary" target="_blank">✈️ Open Telegram Bot</a>
+      <a href="https://t.me/Pinterest_pins_bot" class="btn-primary" target="_blank">✈️ Open Telegram Bot</a>
       <a href="#how" class="btn-secondary">See how it works ↓</a>
     </div>
   </div>
@@ -104,7 +104,7 @@ export default function handler(req, res) {
     <div class="cta-box">
       <h2>Start for free</h2>
       <p>Open the Telegram bot and paste your first Amazon link.</p>
-      <a href="https://t.me/Pinterest_Bot" class="btn-primary" target="_blank" style="display:inline-flex;justify-content:center;width:100%;margin-bottom:12px;">✈️ Open Telegram Bot</a>
+      <a href="https://t.me/Pinterest_pins_bot" class="btn-primary" target="_blank" style="display:inline-flex;justify-content:center;width:100%;margin-bottom:12px;">✈️ Open Telegram Bot</a>
       <p style="font-size:13px;color:#555;">No sign up required. Just open and send a link.</p>
     </div>
   </div>
