@@ -477,7 +477,7 @@ footer{
     <a href="#features" class="nav-link">Features</a>
     <a href="#faq" class="nav-link">FAQ</a>
     <a href="/privacy" class="nav-link">Privacy</a>
-    <a href="https://t.me/Pinterest_Bot" target="_blank" class="nav-cta">✈️ Open Bot</a>
+    <a href="https://t.me/Pinterest_pins_bot" target="_blank" class="nav-cta">✈️ Open Bot</a>
   </div>
 </nav>
 
@@ -496,7 +496,7 @@ footer{
     Paste Amazon product links into Telegram. Get SEO-optimized Pinterest pins posted to your board and channel — instantly.
   </p>
   <div class="hero-actions">
-    <a href="https://t.me/Pinterest_Bot" target="_blank" class="btn-primary">✈️ Open Telegram Bot</a>
+    <a href="https://t.me/Pinterest_pins_bot" target="_blank" class="btn-primary">✈️ Open Telegram Bot</a>
     <a href="#how" class="btn-outline">See how it works →</a>
   </div>
   <div class="scroll-hint">
@@ -747,7 +747,7 @@ footer{
     <h2>Start automating<br/>your Pinterest.</h2>
     <p>Open the bot, paste your first Amazon link, and watch the pin go live in seconds.</p>
     <div class="cta-btns">
-      <a href="https://t.me/Pinterest_Bot" target="_blank" class="btn-primary">✈️ Open Telegram Bot</a>
+      <a href="https://t.me/Pinterest_pins_bot" target="_blank" class="btn-primary">✈️ Open Telegram Bot</a>
       <a href="https://github.com/keerthi-gopi/pinterestbot" target="_blank" class="btn-outline">View on GitHub →</a>
     </div>
   </div>
@@ -764,7 +764,7 @@ footer{
     <a href="#features">Features</a>
     <a href="#faq">FAQ</a>
     <a href="/privacy">Privacy Policy</a>
-    <a href="https://t.me/Pinterest_Bot" target="_blank">Telegram</a>
+    <a href="https://t.me/Pinterest_pins_bot" target="_blank">Telegram</a>
     <a href="https://github.com/keerthi-gopi/pinterestbot" target="_blank">GitHub</a>
   </div>
   <div class="footer-copy">© 2026 Built by <a href="https://github.com/keerthi-gopi" target="_blank">Keerthi Gopi</a></div>
