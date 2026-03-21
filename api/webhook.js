@@ -2,6 +2,14 @@
 import { Telegraf } from "telegraf";
 import { scrapeAmazonProduct } from "../scraper.js";
 import { generatePin, formatPin } from "../gemini.js";
+import { Redis } from "@upstash/redis";
+import { getValidToken, setBoard, getBoard, clearAll } from "../lib/tokenstore.js";
+import { getBoards, postPin } from "../pinterest.js";
+
+const kv = new Redis({
+  url: process.env.UPSTASH_REDIS_REST_URL,
+  token: process.env.UPSTASH_REDIS_REST_TOKEN,
+});
 
 const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN);
 const CHANNEL_ID = process.env.TELEGRAM_CHANNEL_ID;
@@ -23,6 +31,7 @@ async function processProduct(url, index, total, ctx) {
     const pin = await generatePin(product);
     const channelMessage = formatPin(pin, product);
 
+    // Post to Telegram channel
     if (product.image) {
       try {
         await bot.telegram.sendPhoto(
@@ -41,8 +50,25 @@ async function processProduct(url, index, total, ctx) {
       });
     }
 
+    // Post to Pinterest (non-fatal)
+    let pinUrl = null;
+    try {
+      const accessToken = await getValidToken(ctx.from.id);
+      const board = await getBoard(ctx.from.id);
+      if (accessToken && board) {
+        const result = await postPin(product, pin, accessToken, board.id);
+        pinUrl = `https://www.pinterest.com/pin/${result.id}/`;
+        console.log("Pinterest pin created:", pinUrl);
+      }
+    } catch (pErr) {
+      console.log("Pinterest failed (non-fatal):", pErr.message);
+    }
+
     await ctx.reply(
-      `✅ Posted ${index}/${total}\n\n📌 *${pin.title}*\n💰 ${product.price}`,
+      `✅ Posted ${index}/${total}\n\n📌 *${pin.title}*\n💰 ${product.price}` +
+      (pinUrl
+        ? `\n\n📌 Pinterest: ${pinUrl}`
+        : "\n\n_(Pinterest not connected — use /connect)_"),
       { parse_mode: "Markdown" }
     );
 
@@ -54,25 +80,106 @@ async function processProduct(url, index, total, ctx) {
   }
 }
 
-// ── Bot handlers ──────────────────────────────────────────
+// ── /start ────────────────────────────────────────────────
 bot.start((ctx) =>
   ctx.reply(
     `👋 Hi! Send Amazon product links (one per line) and I'll generate Pinterest pins and post them to the channel!\n\n` +
+    `Commands:\n` +
+    `/connect — link your Pinterest account\n` +
+    `/boards — choose which board to post to\n` +
+    `/status — check connection status\n` +
+    `/disconnect — unlink Pinterest\n\n` +
     `Example:\nhttps://www.amazon.in/dp/XXXXX\nhttps://www.amazon.in/dp/YYYYY`
   )
 );
 
+// ── /help ─────────────────────────────────────────────────
 bot.command("help", (ctx) =>
   ctx.reply(
-    `📋 Send Amazon links one per line.\nMax 10 at a time.\n\n` +
-    `Supported:\n• amazon.in\n• amazon.com\n• amzn.to`
+    `📋 *How to use:*\n\n` +
+    `1. /connect — link Pinterest\n` +
+    `2. /boards — pick a board\n` +
+    `3. Paste Amazon links (max 10 at once)\n\n` +
+    `Supported URLs:\n• amazon.in\n• amazon.com\n• amzn.to`,
+    { parse_mode: "Markdown" }
   )
 );
 
+// ── /connect ──────────────────────────────────────────────
+bot.command("connect", async (ctx) => {
+  const authUrl =
+    "https://www.pinterest.com/oauth/?" +
+    `client_id=${process.env.PINTEREST_APP_ID}` +
+    `&redirect_uri=${encodeURIComponent(process.env.PINTEREST_REDIRECT_URI)}` +
+    "&response_type=code" +
+    "&scope=pins:write,boards:read" +
+    `&state=${ctx.from.id}`;
+
+  await ctx.reply("Tap below to connect your Pinterest account:", {
+    reply_markup: {
+      inline_keyboard: [[{ text: "Connect Pinterest", url: authUrl }]],
+    },
+  });
+});
+
+// ── /boards ───────────────────────────────────────────────
+bot.command("boards", async (ctx) => {
+  const token = await getValidToken(ctx.from.id);
+  if (!token) return ctx.reply("Not connected yet. Use /connect first.");
+
+  let boards;
+  try {
+    boards = await getBoards(token);
+  } catch (e) {
+    return ctx.reply("Could not fetch boards: " + e.message);
+  }
+
+  if (!boards.length) return ctx.reply("No public boards found on your account.");
+
+  await kv.set(`boardlist:${ctx.from.id}`, boards);
+
+  const list = boards.map((b, i) => `${i + 1}. ${b.name}`).join("\n");
+  await ctx.reply(
+    "Your Pinterest boards:\n\n" + list +
+    "\n\nReply with the number to select one."
+  );
+});
+
+// ── /disconnect ───────────────────────────────────────────
+bot.command("disconnect", async (ctx) => {
+  await clearAll(ctx.from.id);
+  ctx.reply("Pinterest disconnected. Use /connect to reconnect.");
+});
+
+// ── /status ───────────────────────────────────────────────
+bot.command("status", async (ctx) => {
+  const token = await getValidToken(ctx.from.id);
+  const board = await getBoard(ctx.from.id);
+  if (!token) return ctx.reply("Not connected. Use /connect.");
+  ctx.reply(
+    "✅ Connected to Pinterest\n" +
+    (board ? `📌 Board: ${board.name}` : "⚠️ No board selected. Use /boards.")
+  );
+});
+
+// ── Handle text messages ──────────────────────────────────
 bot.on("text", async (ctx) => {
   const text = ctx.message.text.trim();
   if (text.startsWith("/")) return;
 
+  // Board number selection — intercept before Amazon URL check
+  const boardList = await kv.get(`boardlist:${ctx.from.id}`);
+  if (boardList && /^\d+$/.test(text)) {
+    const boards = Array.isArray(boardList) ? boardList : [];
+    const idx = parseInt(text, 10) - 1;
+    if (idx >= 0 && idx < boards.length) {
+      await setBoard(ctx.from.id, boards[idx].id, boards[idx].name);
+      await kv.del(`boardlist:${ctx.from.id}`);
+      return ctx.reply(`✅ Board set to "${boards[idx].name}". Ready to post pins!`);
+    }
+  }
+
+  // Amazon URL processing
   const urls = extractAmazonUrls(text);
 
   if (urls.length === 0) {
@@ -107,13 +214,16 @@ bot.on("text", async (ctx) => {
     `✅ Posted: ${successful}/${urls.length} pins\n` +
     `❌ Failed: ${failed}/${urls.length}\n\n` +
     (failed > 0
-      ? `Failed:\n${results.filter((r) => !r.success).map((r) => `• ${r.url}`).join("\n")}`
-      : `All pins posted to channel successfully! 🎊`),
+      ? `Failed:\n${results
+          .filter((r) => !r.success)
+          .map((r) => `• ${r.url}`)
+          .join("\n")}`
+      : `All pins posted successfully! 🎊`),
     { parse_mode: "Markdown" }
   );
 });
 
-// ── Vercel handler ────────────────────────────────────────
+// ── Vercel serverless handler ─────────────────────────────
 export default async function handler(req, res) {
   if (req.method === "POST") {
     await bot.handleUpdate(req.body);
