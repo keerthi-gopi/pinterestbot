@@ -109,16 +109,19 @@ nav.scrolled {
 .hero{
   min-height:calc(100vh - 68px);
   display:flex;flex-direction:column;align-items:center;justify-content:center;
-  text-align:center;padding:clamp(60px,8vh,100px) clamp(20px,5vw,48px) clamp(60px,8vh,80px);
-  position:relative;
+  text-align:center;
+  padding:clamp(48px,8vh,100px) clamp(20px,6vw,48px) clamp(60px,8vh,80px);
+  position:relative;overflow:hidden;
 }
 .hero-badge{
-  display:inline-flex;align-items:center;gap:10px;
+  display:inline-flex;align-items:center;gap:8px;
   background:rgba(230,0,35,0.07);border:1px solid rgba(230,0,35,0.16);
-  color:var(--red);font-size:12px;font-weight:600;
-  letter-spacing:1.5px;text-transform:uppercase;
-  padding:8px 20px;border-radius:100px;margin-bottom:clamp(32px,5vh,52px);
+  color:var(--red);font-size:clamp(10px,2.5vw,12px);font-weight:600;
+  letter-spacing:clamp(0.8px,0.3vw,1.5px);text-transform:uppercase;
+  padding:8px clamp(14px,3vw,20px);border-radius:100px;
+  margin-bottom:clamp(28px,5vh,52px);
   animation:fadeUp 0.7s 0.1s ease both;
+  max-width:90vw;text-align:center;
 }
 .hero-badge-dot{
   width:6px;height:6px;background:var(--red);border-radius:50%;
@@ -128,17 +131,19 @@ nav.scrolled {
 
 .hero-h1{
   font-family:'Syne',sans-serif;
-  font-size:clamp(48px,10vw,112px);font-weight:800;
-  line-height:0.92;letter-spacing:clamp(-2px,-0.04em,-4px);
+  font-size:clamp(28px,9.5vw,112px);font-weight:800;
+  line-height:0.94;letter-spacing:-0.02em;
   margin-bottom:clamp(24px,4vh,40px);
   animation:fadeUp 0.8s 0.2s ease both;
+  width:100%;max-width:100%;
+  word-break:break-word;overflow-wrap:break-word;
 }
 .hero-h1 .accent{color:var(--red);}
 .hero-h1 .outline{-webkit-text-stroke:1.5px var(--text);color:transparent;}
 
 .hero-sub{
-  font-size:clamp(15px,2vw,18px);color:var(--text2);font-weight:300;
-  max-width:460px;line-height:1.75;margin-bottom:clamp(36px,5vh,56px);
+  font-size:clamp(14px,2vw,18px);color:var(--text2);font-weight:300;
+  max-width:min(460px, 88vw);line-height:1.75;margin-bottom:clamp(32px,5vh,56px);
   animation:fadeUp 0.8s 0.35s ease both;
 }
 .hero-actions{
@@ -200,7 +205,7 @@ nav.scrolled {
 .stats-grid{
   display:grid;
   grid-template-columns:repeat(4,1fr);
-  padding:0 clamp(20px,5vw,64px);
+  padding:0 clamp(16px,5vw,64px);
   gap:0;
 }
 .stat-cell{
@@ -416,25 +421,40 @@ footer{
   .stats-grid{grid-template-columns:repeat(2,1fr);}
 }
 @media(max-width:820px){
-  .demo-grid{grid-template-columns:1fr;gap:32px;}
+  .demo-grid{grid-template-columns:1fr;gap:28px;}
   .feat-grid{grid-template-columns:repeat(2,1fr);}
 }
 @media(max-width:680px){
   nav .nav-link{display:none;}
-  .hero-h1{letter-spacing:-1.5px;}
   .feat-grid{grid-template-columns:1fr;}
   .steps-grid{grid-template-columns:1fr;}
   .stats-grid{grid-template-columns:repeat(2,1fr);}
-  .cta-card{border-radius:20px;}
+  .cta-card{border-radius:20px;padding:48px 24px;}
   footer{flex-direction:column;text-align:center;}
-  .footer-links{gap:14px;}
-  .hero-actions{flex-direction:column;align-items:center;}
+  .footer-links{gap:14px;justify-content:center;}
+  .hero-actions{flex-direction:column;align-items:center;width:100%;}
   .hero-actions .btn-primary,
-  .hero-actions .btn-outline{width:100%;max-width:300px;justify-content:center;}
+  .hero-actions .btn-outline{width:100%;max-width:280px;justify-content:center;}
+  .section{padding-left:20px;padding-right:20px;}
+  .demo-section{padding-left:20px;padding-right:20px;}
+  .cta-wrap{padding-left:16px;padding-right:16px;}
+}
+/* ── MOBILE HERO FIX ── */
+@media(max-width:540px){
+  .hero{padding-left:20px;padding-right:20px;}
+  .hero-h1{font-size:clamp(26px,8.5vw,60px);letter-spacing:-0.01em;line-height:0.96;}
+  .hero-h1 .outline{-webkit-text-stroke:1px var(--text);}
+  .hero-badge{font-size:10px;letter-spacing:1px;padding:7px 14px;}
+  .hero-sub{font-size:14px;max-width:100%;padding:0 4px;}
+  .stats-grid{padding:0 12px;}
 }
 @media(max-width:400px){
-  .stats-grid{grid-template-columns:1fr;}
-  .stat-cell{padding:32px 20px;}
+  .hero-h1{font-size:7.8vw;}
+  .stats-grid{grid-template-columns:repeat(2,1fr);padding:0 8px;}
+  .stat-cell{padding:28px 16px;}
+  .stat-num{font-size:36px;letter-spacing:-1px;}
+  .step-card,.feat-card{padding:24px 20px;}
+  .section{padding-left:16px;padding-right:16px;}
 }
 </style>
 </head>
@@ -457,7 +477,7 @@ footer{
     <a href="#features" class="nav-link">Features</a>
     <a href="#faq" class="nav-link">FAQ</a>
     <a href="/privacy" class="nav-link">Privacy</a>
-    <a href="https://t.me/Pinterest_pins_bot" target="_blank" class="nav-cta">✈️ Open Bot</a>
+    <a href="https://t.me/Pinterest_Bot" target="_blank" class="nav-cta">✈️ Open Bot</a>
   </div>
 </nav>
 
@@ -476,7 +496,7 @@ footer{
     Paste Amazon product links into Telegram. Get SEO-optimized Pinterest pins posted to your board and channel — instantly.
   </p>
   <div class="hero-actions">
-    <a href="https://t.me/Pinterest_pins_bot" target="_blank" class="btn-primary">✈️ Open Telegram Bot</a>
+    <a href="https://t.me/Pinterest_Bot" target="_blank" class="btn-primary">✈️ Open Telegram Bot</a>
     <a href="#how" class="btn-outline">See how it works →</a>
   </div>
   <div class="scroll-hint">
@@ -727,7 +747,7 @@ footer{
     <h2>Start automating<br/>your Pinterest.</h2>
     <p>Open the bot, paste your first Amazon link, and watch the pin go live in seconds.</p>
     <div class="cta-btns">
-      <a href="https://t.me/Pinterest_pins_bot" target="_blank" class="btn-primary">✈️ Open Telegram Bot</a>
+      <a href="https://t.me/Pinterest_Bot" target="_blank" class="btn-primary">✈️ Open Telegram Bot</a>
       <a href="https://github.com/keerthi-gopi/pinterestbot" target="_blank" class="btn-outline">View on GitHub →</a>
     </div>
   </div>
@@ -744,7 +764,7 @@ footer{
     <a href="#features">Features</a>
     <a href="#faq">FAQ</a>
     <a href="/privacy">Privacy Policy</a>
-    <a href="https://t.me/Pinterest_pins_bot" target="_blank">Telegram</a>
+    <a href="https://t.me/Pinterest_Bot" target="_blank">Telegram</a>
     <a href="https://github.com/keerthi-gopi/pinterestbot" target="_blank">GitHub</a>
   </div>
   <div class="footer-copy">© 2026 Built by <a href="https://github.com/keerthi-gopi" target="_blank">Keerthi Gopi</a></div>
