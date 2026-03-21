@@ -3,7 +3,7 @@ import { Telegraf } from "telegraf";
 import { scrapeAmazonProduct } from "../scraper.js";
 import { generatePin, formatPin } from "../gemini.js";
 import { Redis } from "@upstash/redis";
-import { getValidToken, setBoard, getBoard, clearAll } from "../lib/tokenStore.js";
+import { getValidToken, setBoard, getBoard, clearAll } from "../lib/tokenstore.js";
 import { getBoards, postPin } from "../pinterest.js";
 
 const kv = new Redis({
