@@ -3,12 +3,12 @@ import { Telegraf } from "telegraf";
 import { scrapeAmazonProduct } from "../scraper.js";
 import { generatePin, formatPin } from "../gemini.js";
 import { Redis } from "@upstash/redis";
-import { getValidToken, setBoard, getBoard, clearAll } from "../lib/tokenstore.js";
+import { getValidToken, setBoard, getBoard, clearAll } from "../lib/tokenStore.js";
 import { getBoards, postPin } from "../pinterest.js";
 
 const kv = new Redis({
-  url: process.env.UPSTASH_REDIS_REST_URL,
-  token: process.env.UPSTASH_REDIS_REST_TOKEN,
+  url: process.env.KV_REST_API_URL,
+  token: process.env.KV_REST_API_TOKEN,
 });
 
 const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN);
