@@ -1,5 +1,5 @@
 import { Telegraf } from "telegraf";
-import { storeTokens } from "../lib/tokenStore.js";
+import { storeTokens } from "../lib/tokenstore.js";
 
 const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN);
 
